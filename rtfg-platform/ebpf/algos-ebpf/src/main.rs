@@ -1,0 +1,15 @@
+#![deny(unused_imports)]
+#![allow(static_mut_refs)]
+#![no_std]
+#![no_main]
+
+mod algos;
+
+#[cfg(not(test))]
+#[panic_handler] //
+fn panic(_info: &core::panic::PanicInfo) -> ! {
+    loop {}
+}
+#[link_section = "license"]
+#[no_mangle]
+static LICENSE: [u8; 13] = *b"Dual MIT/GPL\0";
