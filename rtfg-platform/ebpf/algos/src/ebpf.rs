@@ -55,12 +55,12 @@ impl From<&str> for ProgramKind {
 #[derive(Debug, Clone, Copy, Serialize, Deserialize)]
 pub enum MapKind {
     TokenBucket,
+    Unknown,
 }
+
 impl MapKind {
     pub fn to_str(&self) -> &str {
-        match self {
-            Self::TokenBucket => "TOKEN_BUCKETS",
-        }
+        self.into()
     }
 
     pub fn get_mut<'a, K: Pod, V: Pod>(
@@ -71,7 +71,30 @@ impl MapKind {
         Ok(map)
     }
 }
-
+impl From<MapKind> for &'static str {
+    fn from(kind: MapKind) -> Self {
+        match kind {
+            MapKind::TokenBucket => "TOKEN_BUCKETS",
+            _ => "unknown",
+        }
+    }
+}
+impl From<&MapKind> for &'static str {
+    fn from(kind: &MapKind) -> Self {
+        match kind {
+            MapKind::TokenBucket => "TOKEN_BUCKETS",
+            _ => "unknown",
+        }
+    }
+}
+impl From<&str> for MapKind {
+    fn from(value: &str) -> Self {
+        match value {
+            "TOKEN_BUCKETS" => Self::TokenBucket,
+            _ => Self::Unknown,
+        }
+    }
+}
 impl PinLocation {
     #[cfg(target_os = "linux")]
     pub fn new(name: &str) -> Self {
@@ -88,6 +111,17 @@ impl PinLocation {
         std::fs::remove_file(&self.location).context("Failed file remove")
     }
 }
+
+#[derive(Debug, Clone, Copy, Serialize, Deserialize)]
+pub struct Attached;
+
+#[derive(Debug, Clone, Copy, Serialize, Deserialize)]
+pub struct Detached;
+
+#[derive(Debug, Clone, Copy, Serialize, Deserialize)]
+pub struct Pinned;
+#[derive(Debug, Clone, Copy, Serialize, Deserialize)]
+pub struct Unpinned;
 
 #[derive(Debug, Clone, Copy, Serialize, Deserialize)]
 pub enum PinType {
