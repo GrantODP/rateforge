@@ -4,6 +4,7 @@ use std::{
 };
 
 use anyhow::{anyhow, Context};
+use aya::{maps::MapData, Ebpf, Pod};
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Default, Clone, Serialize, Deserialize)]
@@ -16,17 +17,41 @@ pub struct PinLocation {
 pub enum ProgramKind {
     CgroupIngressTknb,
     CgroupEgressTknb,
+    Unknown,
 }
 
 impl ProgramKind {
     pub fn to_str(&self) -> &str {
-        match self {
-            Self::CgroupIngressTknb => "cgroup_ingress_tknb",
-            Self::CgroupEgressTknb => "cgroup_egress_tknb",
+        self.into()
+    }
+}
+impl From<&ProgramKind> for &'static str {
+    fn from(kind: &ProgramKind) -> Self {
+        match kind {
+            ProgramKind::CgroupIngressTknb => "cgroup_ingress_tknb",
+            ProgramKind::CgroupEgressTknb => "cgroup_egress_tknb",
+            ProgramKind::Unknown => "unknown",
         }
     }
 }
-
+impl From<ProgramKind> for &'static str {
+    fn from(kind: ProgramKind) -> Self {
+        match kind {
+            ProgramKind::CgroupIngressTknb => "cgroup_ingress_tknb",
+            ProgramKind::CgroupEgressTknb => "cgroup_egress_tknb",
+            ProgramKind::Unknown => "unknown",
+        }
+    }
+}
+impl From<&str> for ProgramKind {
+    fn from(value: &str) -> Self {
+        match value {
+            "cgroup_ingress_tknb" => Self::CgroupIngressTknb,
+            "cgroup_egress_tknb" => Self::CgroupEgressTknb,
+            _ => Self::Unknown,
+        }
+    }
+}
 #[derive(Debug, Clone, Copy, Serialize, Deserialize)]
 pub enum MapKind {
     TokenBucket,
@@ -37,7 +62,16 @@ impl MapKind {
             Self::TokenBucket => "TOKEN_BUCKETS",
         }
     }
+
+    pub fn get_mut<'a, K: Pod, V: Pod>(
+        &self,
+        ebpf: &'a mut Ebpf,
+    ) -> anyhow::Result<aya::maps::HashMap<&'a mut MapData, K, V>> {
+        let map = aya::maps::HashMap::try_from(ebpf.map_mut(self.to_str()).unwrap())?;
+        Ok(map)
+    }
 }
+
 impl PinLocation {
     #[cfg(target_os = "linux")]
     pub fn new(name: &str) -> Self {
