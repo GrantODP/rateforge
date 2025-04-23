@@ -1,0 +1,18 @@
+[package]
+name = "algos-common"
+version = "0.1.0"
+edition = "2021"
+
+license.workspace = true
+
+[features]
+default = []
+user = ["aya"]
+aya = ["dep:aya"]
+
+[dependencies]
+aya = {version = "0.13.1", workspace = true, optional = true}
+aya-ebpf = { workspace = true }
+bytemuck = { version = "1.14", features = ["derive"]}
+[lib]
+path = "src/lib.rs"
