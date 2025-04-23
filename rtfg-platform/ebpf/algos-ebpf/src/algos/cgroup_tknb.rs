@@ -1,3 +1,4 @@
+use algos_common::token_bucket::{TokenLimit, EGRESS_BUCKET_ID, INGRESS_BUCKET_ID};
 use aya_ebpf::{
     bindings::sk_action,
     helpers::gen::{bpf_get_current_cgroup_id, bpf_get_current_pid_tgid, bpf_ktime_get_ns},
@@ -5,20 +6,17 @@ use aya_ebpf::{
     maps::HashMap,
     programs::SkBuffContext,
 };
-
 use aya_log_ebpf::info;
-use algos_common::token_bucket::{TokenLimit, EGRESS_BUCKET_ID, INGRESS_BUCKET_ID};
-
 
 #[map]
-static MANAGED_BUCKETS: RateBucket = RateBucket::with_max_entries(2, 0);
+static TOKEN_BUCKETS: RateBucket = RateBucket::with_max_entries(2, 0);
 
 type RateBucket = HashMap<u32, TokenLimit>;
 
 #[cgroup_skb]
 pub fn cgroup_egress_tknb(ctx: SkBuffContext) -> i32 {
     info!(&ctx, "EGRESS");
-    match try_token(ctx, &MANAGED_BUCKETS, EGRESS_BUCKET_ID) {
+    match try_token(ctx, &TOKEN_BUCKETS, EGRESS_BUCKET_ID) {
         Ok(ret) => ret,
         Err(_) => sk_action::SK_PASS as i32,
     }
@@ -26,12 +24,11 @@ pub fn cgroup_egress_tknb(ctx: SkBuffContext) -> i32 {
 #[cgroup_skb]
 pub fn cgroup_ingress_tknb(ctx: SkBuffContext) -> i32 {
     info!(&ctx, "EGRESS");
-    match try_token(ctx, &MANAGED_BUCKETS, INGRESS_BUCKET_ID) {
+    match try_token(ctx, &TOKEN_BUCKETS, INGRESS_BUCKET_ID) {
         Ok(ret) => ret,
         Err(_) => sk_action::SK_PASS as i32,
     }
 }
-
 
 fn try_token(ctx: SkBuffContext, bucket: &RateBucket, bucket_id: u32) -> Result<i32, ()> {
     unsafe {
@@ -85,4 +82,3 @@ fn try_token(ctx: SkBuffContext, bucket: &RateBucket, bucket_id: u32) -> Result<
     }
     Ok(sk_action::SK_PASS as i32)
 }
-
