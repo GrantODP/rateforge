@@ -1,11 +1,14 @@
-use std::path::{Path, PathBuf};
+use std::{
+    ffi::OsStr,
+    path::{Path, PathBuf},
+};
 
 use anyhow::{anyhow, Context};
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Default, Clone, Serialize, Deserialize)]
 pub struct PinLocation {
-    location: PathBuf,
+    pub location: PathBuf,
 }
 
 //used to hard limit available programs to run
@@ -37,17 +40,17 @@ impl MapKind {
 }
 impl PinLocation {
     #[cfg(target_os = "linux")]
-    fn new(name: &str) -> Self {
+    pub fn new(name: &str) -> Self {
         Self {
             location: PathBuf::from("/sys/fs/bpf/").join(name),
         }
     }
 
-    fn location(&self) -> &Path {
+    pub fn location(&self) -> &Path {
         &self.location
     }
 
-    fn delete(&self) -> anyhow::Result<()> {
+    pub fn delete(&self) -> anyhow::Result<()> {
         std::fs::remove_file(&self.location).context("Failed file remove")
     }
 }
@@ -60,6 +63,34 @@ pub enum PinType {
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct PinnedObject {
-    pinned_type: PinType,
+    pin_type: PinType,
     location: PinLocation,
+}
+
+impl PinnedObject {
+    pub fn new(pin_type: PinType, location: PinLocation) -> Self {
+        Self { pin_type, location }
+    }
+
+    #[inline]
+    pub fn path(&self) -> &Path {
+        &self.location.location
+    }
+    #[inline]
+    pub fn pin_type(&self) -> &PinType {
+        &self.pin_type
+    }
+    #[inline]
+    pub fn pin_type_mut(&mut self) -> &mut PinType {
+        &mut self.pin_type
+    }
+    #[inline]
+    pub fn name(&self) -> Option<&OsStr> {
+        self.location.location.file_name()
+    }
+
+    #[inline]
+    pub fn delete(&mut self) -> anyhow::Result<()> {
+        self.location.delete()
+    }
 }
