@@ -1,17 +1,17 @@
 use std::path::PathBuf;
 
+use algos_common::token_bucket::{TokenLimit, EGRESS_BUCKET_ID, INGRESS_BUCKET_ID};
 use anyhow::{Context, Ok};
 use aya::{
     maps::HashMap,
     programs::{CgroupAttachMode, CgroupSkb, CgroupSkbAttachType},
     Ebpf,
 };
-use algos_common::token_bucket::{
-    TokenLimit, EGRESS_BUCKET, EGRESS_BUCKET_ID, INGRESS_BUCKET, INGRESS_BUCKET_ID,
-};
-use log::{info, debug, warn};
+use log::{debug, info};
 
-#[cfg(feature= "ebpf_logging_enabled")]
+use crate::ebpf::{MapKind, PinLocation, PinType, PinnedObject, ProgramKind};
+
+#[cfg(feature = "ebpf_logging_enabled")]
 fn enable_ebpf_logging(ebpf: &mut Ebpf) {
     if let Err(e) = aya_log::EbpfLogger::init(&mut ebpf) {
         // This can happen if you remove all log statements from your eBPF program.
@@ -90,14 +90,21 @@ pub async fn get_ebpf() -> anyhow::Result<Ebpf> {
 //     Ok(ebpf)
 // }
 //
+
 pub async fn get_ebpf_cgroup<'a>(
     name: &str,
     ebpf: &'a mut Ebpf,
 ) -> anyhow::Result<&'a mut CgroupSkb> {
     let program: &mut CgroupSkb = ebpf.program_mut(name).unwrap().try_into()?;
 
-    println!("got cgroup {}", name);
+    info!("got cgroup {}", name);
     Ok(program)
+}
+pub async fn get_token_bucket_ingress<'a>(ebpf: &'a mut Ebpf) -> anyhow::Result<&'a mut CgroupSkb> {
+    Ok(get_ebpf_cgroup(ProgramKind::CgroupIngressTknb.into(), ebpf).await?)
+}
+pub async fn get_token_bucket_egress<'a>(ebpf: &'a mut Ebpf) -> anyhow::Result<&'a mut CgroupSkb> {
+    Ok(get_ebpf_cgroup(ProgramKind::CgroupEgressTknb.into(), ebpf).await?)
 }
 pub async fn load_attach_egress<'a>(
     cgroup_path: &PathBuf,
@@ -108,10 +115,10 @@ pub async fn load_attach_egress<'a>(
     program.attach(&cgroup, CgroupSkbAttachType::Egress, CgroupAttachMode::Single)
         .context("failed to attach the Cgroup program with default flags - try changing XdpFlags::default() to XdpFlags::SKB_MODE")?;
 
-    info!("Loaded Ingress Program {:?} at: {:?}",program, cgroup_path);
+    info!("Loaded Ingress Program {:?} at: {:?}", program, cgroup_path);
     Ok(())
 }
-pub async fn load_attach_ingress<'a>(
+pub fn load_attach_ingress<'a>(
     cgroup_path: &PathBuf,
     program: &'a mut CgroupSkb,
 ) -> anyhow::Result<()> {
@@ -119,22 +126,58 @@ pub async fn load_attach_ingress<'a>(
     program.load()?;
     program.attach(&cgroup, CgroupSkbAttachType::Ingress, CgroupAttachMode::Single)
         .context("failed to attach the Cgroup program with default flags - try changing XdpFlags::default() to XdpFlags::SKB_MODE")?;
-    info!("Loaded Ingress Program {:?} at: {:?}",program, cgroup_path);
+    info!("Loaded Ingress Program {:?} at: {:?}", program, cgroup_path);
 
     Ok(())
 }
-pub async fn update_egress_rate(rate: TokenLimit, ebpf: &mut Ebpf) -> anyhow::Result<()> {
+
+pub fn update_token_egress_rate(rate: TokenLimit, ebpf: &mut Ebpf) -> anyhow::Result<()> {
+    let kind = MapKind::TokenBucket;
     let mut map: HashMap<_, u32, TokenLimit> =
-        HashMap::try_from(ebpf.map_mut(EGRESS_BUCKET).unwrap())?;
+        HashMap::try_from(ebpf.map_mut(kind.into()).unwrap())?;
 
     map.insert(EGRESS_BUCKET_ID, rate, 0)?;
+
+    info!("Inserted: {:?} into {:?}", rate, kind);
     Ok(())
 }
-pub async fn update_ingress_rate(rate: TokenLimit, ebpf: &mut Ebpf) -> anyhow::Result<()> {
+
+pub fn update_token_and_pin_egress(
+    rate: TokenLimit,
+    path: PinLocation,
+    ebpf: &mut Ebpf,
+) -> anyhow::Result<PinnedObject> {
+    let kind = MapKind::TokenBucket;
     let mut map: HashMap<_, u32, TokenLimit> =
-        HashMap::try_from(ebpf.map_mut(INGRESS_BUCKET).unwrap())?;
+        HashMap::try_from(ebpf.map_mut(kind.into()).unwrap())?;
+    map.insert(EGRESS_BUCKET_ID, rate, 0)?;
+    info!("Inserted: {:?} into {:?}", rate, kind);
+    map.pin(path.location())?;
+    info!("Pinned Map: {:?} to {:?}", kind, path);
+    Ok(PinnedObject::new(PinType::Map(MapKind::TokenBucket), path))
+}
+
+pub fn update_token_and_pin_ingress(
+    rate: TokenLimit,
+    path: PinLocation,
+    ebpf: &mut Ebpf,
+) -> anyhow::Result<PinnedObject> {
+    let kind = MapKind::TokenBucket;
+    let mut map: HashMap<_, u32, TokenLimit> =
+        HashMap::try_from(ebpf.map_mut(kind.into()).unwrap())?;
+    map.insert(INGRESS_BUCKET_ID, rate, 0)?;
+    info!("Inserted: {:?} into {:?}", rate, kind);
+    map.pin(path.location())?;
+    info!("Pinned Map: {:?} to {:?}", kind, path);
+    Ok(PinnedObject::new(PinType::Map(MapKind::TokenBucket), path))
+}
+
+pub fn update_token_ingress_rate(rate: TokenLimit, ebpf: &mut Ebpf) -> anyhow::Result<()> {
+    let kind = MapKind::TokenBucket;
+    let mut map: HashMap<_, u32, TokenLimit> =
+        HashMap::try_from(ebpf.map_mut(kind.into()).unwrap())?;
+    info!("Inserted: {:?} into {:?}", rate, kind);
     map.insert(INGRESS_BUCKET_ID, rate, 0)?;
 
     Ok(())
 }
-
