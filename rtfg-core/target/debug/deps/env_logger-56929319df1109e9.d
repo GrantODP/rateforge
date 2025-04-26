@@ -1,0 +1,10 @@
+/home/grant/Documents/projects/rateforge/rtfg-core/target/debug/deps/libenv_logger-56929319df1109e9.rmeta: /home/grant/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/env_logger-0.11.8/src/lib.rs /home/grant/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/env_logger-0.11.8/src/logger.rs /home/grant/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/env_logger-0.11.8/src/fmt/mod.rs /home/grant/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/env_logger-0.11.8/src/fmt/writer/mod.rs /home/grant/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/env_logger-0.11.8/src/fmt/writer/buffer.rs /home/grant/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/env_logger-0.11.8/src/fmt/writer/target.rs
+
+/home/grant/Documents/projects/rateforge/rtfg-core/target/debug/deps/env_logger-56929319df1109e9.d: /home/grant/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/env_logger-0.11.8/src/lib.rs /home/grant/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/env_logger-0.11.8/src/logger.rs /home/grant/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/env_logger-0.11.8/src/fmt/mod.rs /home/grant/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/env_logger-0.11.8/src/fmt/writer/mod.rs /home/grant/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/env_logger-0.11.8/src/fmt/writer/buffer.rs /home/grant/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/env_logger-0.11.8/src/fmt/writer/target.rs
+
+/home/grant/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/env_logger-0.11.8/src/lib.rs:
+/home/grant/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/env_logger-0.11.8/src/logger.rs:
+/home/grant/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/env_logger-0.11.8/src/fmt/mod.rs:
+/home/grant/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/env_logger-0.11.8/src/fmt/writer/mod.rs:
+/home/grant/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/env_logger-0.11.8/src/fmt/writer/buffer.rs:
+/home/grant/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/env_logger-0.11.8/src/fmt/writer/target.rs:
