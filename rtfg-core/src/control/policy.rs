@@ -86,7 +86,6 @@ impl PolicyBuilder {
         let down = (self.down != 0).then_some(Rate(self.down));
         let up = (self.down != 0).then_some(Rate(self.down));
         let id = self.rid.unwrap_or(generate_rid(down.as_ref(), up.as_ref()));
-        let process_name = self.name.unwrap_or(format!("policy{}", id));
         Policy { down, up, id }
     }
 }
