@@ -1,8 +1,0 @@
-/home/grant/Documents/projects/rateforge/rtfg-core/target/debug/deps/libcamino-b5bac33329446575.rmeta: /home/grant/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/camino-1.1.9/src/lib.rs /home/grant/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/camino-1.1.9/src/serde_impls.rs
-
-/home/grant/Documents/projects/rateforge/rtfg-core/target/debug/deps/libcamino-b5bac33329446575.rlib: /home/grant/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/camino-1.1.9/src/lib.rs /home/grant/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/camino-1.1.9/src/serde_impls.rs
-
-/home/grant/Documents/projects/rateforge/rtfg-core/target/debug/deps/camino-b5bac33329446575.d: /home/grant/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/camino-1.1.9/src/lib.rs /home/grant/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/camino-1.1.9/src/serde_impls.rs
-
-/home/grant/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/camino-1.1.9/src/lib.rs:
-/home/grant/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/camino-1.1.9/src/serde_impls.rs:
