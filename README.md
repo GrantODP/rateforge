@@ -1,5 +1,5 @@
 # rateforge
-A per process rate limiting software
+A per process network rate limiting software
 
 ## Todo
 - storing process rate policies 
