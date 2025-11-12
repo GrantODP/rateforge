@@ -1,10 +1,10 @@
 # rateforge
 A per process network rate limiting software
 
-#Current features
+# Current features
 -Limit a named process download and upload speed
 
-#Note
+# Note
 Requires root permissions
 
 ## Todo
